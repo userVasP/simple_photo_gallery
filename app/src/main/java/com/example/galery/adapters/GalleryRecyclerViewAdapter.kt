@@ -6,8 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.os.bundleOf
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import com.example.galery.R
 import com.example.galery.data.Photo
 import com.example.galery.data.PhotoLocalDataSource
 import com.example.galery.databinding.GaleryFragmentItemBinding
@@ -31,9 +34,16 @@ class PictureRecyclerViewAdapter : ListAdapter<Photo, PictureRecyclerViewAdapter
         if (photo != null) {
             holder.bind(photo)
         }
+        holder.binding.root.setOnClickListener {
+            val bundle = bundleOf("photoUri" to photo.uri.toString())
+
+            Navigation.findNavController(holder.binding.root).navigate(
+                R.id.action_pictureFragment_to_galleryDetailFragment,
+                bundle)
+        }
     }
 
-    inner class ViewHolder(private  val binding: GaleryFragmentItemBinding) :
+    inner class ViewHolder(val binding: GaleryFragmentItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: Photo) {

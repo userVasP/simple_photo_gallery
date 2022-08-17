@@ -42,12 +42,15 @@ class GalleryFragment : Fragment() {
                 pictureRecyclerViewAdapter.submitList(it as MutableList<Photo>)
             }
         }
-        loadPhoto()
+        if(!viewModel.isFirstLoadedPhoto){
+            loadPhoto()
+        }
     }
 
     private fun loadPhoto() {
         lifecycleScope.launch {
             viewModel.getPhoto()
+            viewModel.isFirstLoadedPhoto = true
             }
         }
 }

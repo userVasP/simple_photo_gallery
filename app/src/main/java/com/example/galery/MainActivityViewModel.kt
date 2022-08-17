@@ -1,11 +1,8 @@
 package com.example.galery
 
-import android.content.ContentResolver
 import android.content.Context
 import android.database.ContentObserver
-import android.net.Uri
 import android.os.Handler
-import android.provider.MediaStore
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,6 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MainActivityViewModel @Inject constructor(private val photoRepository: PhotoRepository, context: Context) : ViewModel() {
+    var isFirstLoadedPhoto = false
     private var _photos = MutableLiveData<List<Photo>>()
     val photos: LiveData<List<Photo>> = _photos
     private val contentResolver = context.contentResolver

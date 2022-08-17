@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
@@ -43,6 +44,16 @@ class MainActivity : AppCompatActivity() {
 
         appBarConfiguration = AppBarConfiguration(navController.graph, drawerLayout)
         setupActionBarWithNavController(navController, appBarConfiguration)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if(destination.id == R.id.galleryDetailFragment) {
+                drawerLayout?.visibility = View.GONE
+                activityMainBinding.bottomNav?.visibility = View.GONE
+            } else {
+                drawerLayout?.visibility = View.VISIBLE
+                activityMainBinding.bottomNav?.visibility = View.VISIBLE
+            }
+        }
 
     }
 
