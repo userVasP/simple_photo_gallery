@@ -37,13 +37,19 @@ class GalleryFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.photos.observe(viewLifecycleOwner) {
-            it?.let {
-                pictureRecyclerViewAdapter.submitList(it as MutableList<Photo>)
+        viewModel.isPermissionGranted.observe(viewLifecycleOwner) { permission ->
+            permission?.let {
+                if(permission){
+                    viewModel.photos.observe(viewLifecycleOwner) { photo ->
+                        photo?.let {
+                            pictureRecyclerViewAdapter.submitList(photo as MutableList<Photo>)
+                        }
+                    }
+                    if(!viewModel.isFirstLoadedPhoto){
+                        loadPhoto()
+                    }
+                }
             }
-        }
-        if(!viewModel.isFirstLoadedPhoto){
-            loadPhoto()
         }
     }
 

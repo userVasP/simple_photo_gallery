@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MainActivityViewModel @Inject constructor(private val photoRepository: PhotoRepository, context: Context) : ViewModel() {
+    var isPermissionGranted = MutableLiveData(false)
     var isFirstLoadedPhoto = false
     private var _photos = MutableLiveData<List<Photo>>()
     val photos: LiveData<List<Photo>> = _photos

@@ -1,12 +1,14 @@
 package com.example.galery
 
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
-import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
@@ -15,11 +17,10 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.*
 import com.example.galery.databinding.ActivityMainBinding
 import com.example.galery.di.AppComponent
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.navigation.NavigationView
 import javax.inject.Inject
 
-class MainActivity : AppCompatActivity() {
+const val PERMISSION_REQUEST_STORAGE = 0
+class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsResultCallback {
 
     lateinit var appComponent: AppComponent
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -27,13 +28,17 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+    private val viewModel by viewModels<MainActivityViewModel> { viewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         activityMainBinding = DataBindingUtil.setContentView(
             this, R.layout.activity_main)
         appComponent = (application as GalleryApplication).appComponent
         appComponent.inject(this)
+
+        checkStoragePermission()
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -54,7 +59,10 @@ class MainActivity : AppCompatActivity() {
                 activityMainBinding.bottomNav?.visibility = View.VISIBLE
             }
         }
+    }
 
+    private fun onPermissionGranted() {
+        viewModel.isPermissionGranted.value = true
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -77,5 +85,63 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
+    }
+
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_REQUEST_STORAGE) {
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
+                if (grantResults.size == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    onPermissionGranted()
+                }
+                else {
+                    finish()
+                }
+            }
+            else {
+                if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    onPermissionGranted()
+                }
+                else
+                    finish()
+                }
+            }
+
+        }
+
+    private fun checkStoragePermission() {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED) {
+                onPermissionGranted()
+            }
+            else {
+                requestStoragePermission(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            }
+        }
+
+        else {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED)  {
+                onPermissionGranted()
+            }
+            else {
+                requestStoragePermission(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE))
+            }
+        }
+
+    }
+
+    private fun requestStoragePermission(permissions: Array<String>) {
+        ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_STORAGE)
     }
 }

@@ -16,4 +16,5 @@
         android:id="@+id/galleryDetailFragment"
         android:name="com.example.galery.GaleryDetailFragment"
         android:label="GalleryDetailFragment" />
+
 </navigation>
