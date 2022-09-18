@@ -15,6 +15,12 @@
     <fragment
         android:id="@+id/galleryDetailFragment"
         android:name="com.example.galery.GaleryDetailFragment"
-        android:label="GalleryDetailFragment" />
+        android:label="GalleryDetailFragment" >
+        <action
+            android:id="@+id/action_galleryDetailFragment_to_galleryFragment"
+            app:destination="@id/galleryFragment"
+            app:popUpTo="@id/galleryFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 
 </navigation>

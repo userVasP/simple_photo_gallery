@@ -1,7 +1,11 @@
 package com.example.galery
 
+import android.app.RecoverableSecurityException
 import android.content.Context
+import android.content.IntentSender
 import android.database.ContentObserver
+import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,6 +24,9 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
     val photos: LiveData<List<Photo>> = _photos
     private val contentResolver = context.contentResolver
     private var contentObserver: ContentObserver? = null
+    private var pendingDeleteImageUri: Uri? = null
+    private val _permissionNeededForDelete = MutableLiveData<IntentSender?>()
+    val permissionNeededForDelete: LiveData<IntentSender?> = _permissionNeededForDelete
 
     fun getPhoto() {
         viewModelScope.launch {
@@ -35,6 +42,36 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
                 )
             }
             _photos.postValue(photoRepository.getPhoto())
+        }
+    }
+
+    fun deletePendingPhoto() {
+        pendingDeleteImageUri?.let { deletePhoto(it) }
+    }
+
+    fun deleteChosenPhoto(uri: Uri) {
+        deletePhoto(uri)
+    }
+
+    private fun deletePhoto(uri: Uri) {
+        viewModelScope.launch {
+            try {
+                photoRepository.deletePhoto(uri)
+            }
+            catch (securityException: SecurityException) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    val recoverableSecurityException =
+                        securityException as? RecoverableSecurityException
+                            ?: throw securityException
+
+                    pendingDeleteImageUri = uri
+                    _permissionNeededForDelete.postValue(
+                        recoverableSecurityException.userAction.actionIntent.intentSender
+                    )
+                } else {
+                    throw securityException
+                }
+            }
         }
     }
 

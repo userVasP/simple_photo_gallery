@@ -7,8 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.GridLayoutManager
-import com.example.galery.adapters.bindImageFromUrl
+import androidx.navigation.Navigation
 import com.example.galery.databinding.FragmentGaleryDetailBinding
 
 
@@ -27,6 +26,13 @@ class GaleryDetailFragment : Fragment() {
 
         with(binding.selectedPhoto) {
             this.setImageURI(Uri.parse(uriString))
+        }
+
+        binding.deleteBtn.setOnClickListener {
+            viewModel.deleteChosenPhoto(Uri.parse(uriString))
+            Navigation.findNavController(binding.root).navigate(
+                R.id.action_galleryDetailFragment_to_galleryFragment,
+                null)
         }
 
         return binding.root

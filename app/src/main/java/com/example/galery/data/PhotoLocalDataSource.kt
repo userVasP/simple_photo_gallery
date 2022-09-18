@@ -13,11 +13,12 @@ import javax.inject.Inject
 
 class PhotoLocalDataSource @Inject constructor(context: Context) {
     private val contentResolver = context.contentResolver
-    private val photoList = mutableListOf<Photo>()
+
 
     suspend fun getPhotoLocal(): MutableList<Photo> {
-
+        val photoList = mutableListOf<Photo>()
         withContext(Dispatchers.IO) {
+
 
             val projection = arrayOf(
                 MediaStore.Images.Media._ID,
@@ -56,6 +57,14 @@ class PhotoLocalDataSource @Inject constructor(context: Context) {
             }
         }
         return photoList
+    }
+
+    suspend fun deletePhoto(imageUri:Uri) {
+        withContext(Dispatchers.IO) {
+            val numImagesRemoved = contentResolver.delete(
+                imageUri, null, null)
+        }
+
     }
 }
 
