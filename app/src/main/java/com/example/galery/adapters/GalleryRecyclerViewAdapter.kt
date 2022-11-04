@@ -2,17 +2,14 @@ package com.example.galery.adapters
 
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import com.example.galery.utilities.Constants
 import com.example.galery.R
 import com.example.galery.data.Photo
-import com.example.galery.data.PhotoLocalDataSource
 import com.example.galery.databinding.GaleryFragmentItemBinding
 
 
@@ -35,7 +32,7 @@ class PictureRecyclerViewAdapter : ListAdapter<Photo, PictureRecyclerViewAdapter
             holder.bind(photo)
         }
         holder.binding.root.setOnClickListener {
-            val bundle = bundleOf("photoUri" to photo.uri.toString())
+            val bundle = bundleOf(Constants.PHOTO_URI to photo.uri.toString(), Constants.PHOTO_KEY to (photo.getKey()))
 
             Navigation.findNavController(holder.binding.root).navigate(
                 R.id.action_pictureFragment_to_galleryDetailFragment,

@@ -16,8 +16,7 @@
             android:id="@+id/imageView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:imageFromUrl="@{photo.uri}"
-            tools:srcCompat="@tools:sample/backgrounds/scenic" />
+            app:imageFromUrl="@{photo.uri}" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

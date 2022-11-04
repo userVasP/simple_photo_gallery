@@ -2,5 +2,5 @@
 <resources>
     <string name="photo">Photo</string>
     <string name="button_for_delating_photo">Button for delating photo</string>
-    <string name="editing_photo">Editing photo</string>
+    <string name="favorite_photo">Editing photo</string>
 </resources>

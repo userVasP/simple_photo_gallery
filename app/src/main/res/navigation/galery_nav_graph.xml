@@ -6,21 +6,44 @@
     app:startDestination="@id/galleryFragment">
     <fragment
         android:id="@+id/galleryFragment"
-        android:name="com.example.galery.GalleryFragment"
+        android:name="com.example.galery.FullGalleryFragment"
         android:label="GalleryFragment" >
         <action
             android:id="@+id/action_pictureFragment_to_galleryDetailFragment"
             app:destination="@id/galleryDetailFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/galleryDetailFragment"
-        android:name="com.example.galery.GaleryDetailFragment"
-        android:label="GalleryDetailFragment" >
+        android:name="com.example.galery.FullGalleryDetailFragment"
+        android:label="FullGalleryDetailFragment" >
         <action
             android:id="@+id/action_galleryDetailFragment_to_galleryFragment"
             app:destination="@id/galleryFragment"
             app:popUpTo="@id/galleryFragment"
             app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/selected_galleryDetailFragment"
+        android:name="com.example.galery.SelectedGalleryDetailFragment"
+        android:label="SelectedGalleryDetailFragment" >
+
+        <action
+            android:id="@+id/action_galleryDetailFragment_to_selectedGalleryFragment"
+            app:destination="@id/selectedGalleryFragment"
+            app:popUpTo="@id/selectedGalleryFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/selectedGalleryFragment"
+        android:name="com.example.galery.SelectedGalleryFragment"
+        android:label="SelectedGalleryFragment">
+        <action
+            android:id="@+id/action_pictureFragment_to_galleryDetailFragment"
+            app:destination="@id/selected_galleryDetailFragment"/>
+
     </fragment>
 
 </navigation>

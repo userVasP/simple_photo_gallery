@@ -14,10 +14,10 @@ import com.example.galery.databinding.FragmentItemListBinding
 import kotlinx.coroutines.launch
 
 
-class GalleryFragment : Fragment() {
+abstract class GalleryFragment : Fragment() {
 
-    private val viewModel by activityViewModels<MainActivityViewModel> { (activity as MainActivity).viewModelFactory }
-    private val pictureRecyclerViewAdapter = PictureRecyclerViewAdapter()
+    protected val viewModel by activityViewModels<MainActivityViewModel> { (activity as MainActivity).viewModelFactory }
+    protected val pictureRecyclerViewAdapter = PictureRecyclerViewAdapter()
     private var columnCount = 2
 
     override fun onCreateView(
@@ -39,19 +39,17 @@ class GalleryFragment : Fragment() {
         super.onStart()
         viewModel.isPermissionGranted.observe(viewLifecycleOwner) { permission ->
             permission?.let {
-                if(permission){
-                    viewModel.photos.observe(viewLifecycleOwner) { photo ->
-                        photo?.let {
-                            pictureRecyclerViewAdapter.submitList(photo as MutableList<Photo>)
-                        }
-                    }
-                    if(!viewModel.isFirstLoadedPhoto){
+                if(permission) {
+                    observePhoto()
+                    if(!viewModel.isFirstLoadedPhoto) {
                         loadPhoto()
                     }
                 }
             }
         }
     }
+
+    abstract fun observePhoto()
 
     private fun loadPhoto() {
         lifecycleScope.launch {

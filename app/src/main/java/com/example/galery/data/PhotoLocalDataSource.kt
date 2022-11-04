@@ -7,13 +7,25 @@ import android.os.Build
 import android.provider.MediaStore
 import com.example.galery.data.CollectionUri.getCollectionUri
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
-class PhotoLocalDataSource @Inject constructor(context: Context) {
+class PhotoLocalDataSource @Inject constructor(context: Context,  private val photoDAO: PhotoDAO) {
     private val contentResolver = context.contentResolver
 
+    fun getAllFavoritePhoto(): Flow<List<PhotoEntity>> {
+        return photoDAO.getAllFavoritePhotoAsFlow()
+    }
+
+    suspend fun insertFavoritePhoto(photoEntity: PhotoEntity) {
+        photoDAO.insert(photoEntity)
+    }
+
+    suspend fun checkPhoto(key: String): Boolean {
+        return photoDAO.searchPhoto(key).isNotEmpty()
+    }
 
     suspend fun getPhotoLocal(): MutableList<Photo> {
         val photoList = mutableListOf<Photo>()
@@ -23,7 +35,7 @@ class PhotoLocalDataSource @Inject constructor(context: Context) {
             val projection = arrayOf(
                 MediaStore.Images.Media._ID,
                 MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.DATE_TAKEN
+                MediaStore.Images.Media.DATE_TAKEN,
             )
 
             val query = contentResolver.query(
@@ -66,6 +78,16 @@ class PhotoLocalDataSource @Inject constructor(context: Context) {
         }
 
     }
+
+    suspend fun deleteFavoritePhoto(photoEntity: PhotoEntity) {
+        photoDAO.delete(photoEntity)
+    }
+
+    fun getAllPhoto(): List<PhotoEntity> {
+        return photoDAO.getAllFavoritePhoto()
+    }
+
+
 }
 
 object CollectionUri {
