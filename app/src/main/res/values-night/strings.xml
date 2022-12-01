@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="photo">Photo</string>
-    <string name="button_for_delating_photo">Button for delating photo</string>
     <string name="favorite_photo">Editing photo</string>
+    <string name="logged_in_description">You are logged in as</string>
+    <string name="send_photo_to_server">Send photo to server</string>
+    <string name="load_photo_from_server">Load photo from server</string>
+    <string name="logout">Logout</string>
+    <string name="registration">Registration</string>
+    <string name="login">Login</string>
 </resources>

@@ -8,17 +8,17 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import androidx.lifecycle.*
-import com.example.galery.data.CollectionUri
-import com.example.galery.data.Photo
-import com.example.galery.data.PhotoEntity
-import com.example.galery.data.PhotoRepository
+import com.example.galery.data.*
+import com.example.galery.utilities.ObservableViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class MainActivityViewModel @Inject constructor(private val photoRepository: PhotoRepository, context: Context) : ViewModel() {
+class MainActivityViewModel @Inject constructor(private val photoRepository: PhotoRepository, context: Context) : ObservableViewModel() {
+
+
     var isPermissionGranted = MutableLiveData(false)
     var isFirstLoadedPhoto = false
     private var _photos = MutableLiveData<List<Photo>>()
@@ -36,6 +36,12 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
 
     val allFavoritePhoto: LiveData<List<PhotoEntity>> = photoRepository.allFavoritePhoto.asLiveData()
 
+    /*fun registration() {
+        viewModelScope.launch {
+            this@MainActivityViewModel._userData.value?.let { photoRepository.registration(it) }
+        }
+    }*/
+
     fun addFavoritePhoto(key: String) {
         viewModelScope.launch {
             photoRepository.insertFavoritePhoto(key)
@@ -45,7 +51,6 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
                     (_favoritePhotos.value as MutableList).add(it)
                 }
             }
-
         }
     }
 

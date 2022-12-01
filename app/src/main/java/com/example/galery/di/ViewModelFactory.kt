@@ -1,14 +1,11 @@
 package com.example.galery.di
 
-import android.database.ContentObserver
-import android.os.Handler
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.galery.MainActivityViewModel
 import dagger.Binds
 import dagger.MapKey
 import dagger.Module
-import dagger.Provides
 import dagger.multibindings.IntoMap
 import javax.inject.Inject
 import javax.inject.Provider

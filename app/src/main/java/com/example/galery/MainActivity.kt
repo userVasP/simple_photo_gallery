@@ -57,12 +57,23 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if(destination.id == R.id.galleryDetailFragment) {
-                drawerLayout?.visibility = View.GONE
-                activityMainBinding.bottomNav?.visibility = View.GONE
-            } else {
-                drawerLayout?.visibility = View.VISIBLE
-                activityMainBinding.bottomNav?.visibility = View.VISIBLE
+            when(destination.id) {
+                R.id.galleryDetailFragment -> {
+                    drawerLayout?.visibility = View.GONE
+                    activityMainBinding.bottomNav?.visibility = View.GONE
+                }
+                R.id.loginFragment -> {
+                    drawerLayout?.visibility = View.GONE
+                    activityMainBinding.bottomNav?.visibility = View.GONE
+                }
+                R.id.registrationFragment -> {
+                    drawerLayout?.visibility = View.GONE
+                    activityMainBinding.bottomNav?.visibility = View.GONE
+                }
+                else -> {
+                    drawerLayout?.visibility = View.VISIBLE
+                    activityMainBinding.bottomNav?.visibility = View.VISIBLE
+                }
             }
         }
 

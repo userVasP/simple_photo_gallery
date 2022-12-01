@@ -8,4 +8,8 @@
     android:id="@+id/selectedGalleryFragment"
     android:title="Favorite"
     android:icon="@drawable/ic_baseline_favorite_24"/>
+<item
+    android:id="@+id/serverFragment"
+    android:title="Server"
+    android:icon="@drawable/ic_baseline_cloud_24"/>
 </menu>

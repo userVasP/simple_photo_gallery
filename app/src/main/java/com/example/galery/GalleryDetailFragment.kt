@@ -2,12 +2,11 @@ package com.example.galery
 
 import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.Navigation
 import com.example.galery.databinding.FragmentGaleryDetailBinding
 import com.example.galery.utilities.Constants
 
@@ -60,7 +59,7 @@ abstract class GaleryDetailFragment : Fragment() {
 
     }
     
-    abstract fun navigateForDeletingPhoto(view: View);
+    abstract fun navigateForDeletingPhoto(view: View)
     open fun navigateForDeletingFavoritePhoto(view: View) {
 
     }
