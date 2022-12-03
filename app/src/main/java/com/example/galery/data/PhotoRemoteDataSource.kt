@@ -5,6 +5,9 @@ import android.graphics.Bitmap
 import com.example.galery.api.PhotoServerApi
 import com.example.galery.utilities.Utils
 import com.example.galery.data.model.LoggedInUser
+import com.example.galery.data.model.Photo
+import com.example.galery.data.model.Result
+import com.example.galery.data.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull

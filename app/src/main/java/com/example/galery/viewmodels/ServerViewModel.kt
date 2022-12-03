@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.galery.Event
+import com.example.galery.utilities.Event
 import com.example.galery.data.PhotoRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject

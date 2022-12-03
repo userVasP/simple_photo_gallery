@@ -1,4 +1,4 @@
-package com.example.galery.registration
+package com.example.galery.data.model.registration
 
 data class RegistrationFormState(
     val usernameError: Int? = null,

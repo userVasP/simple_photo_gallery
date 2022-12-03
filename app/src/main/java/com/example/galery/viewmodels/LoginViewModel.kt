@@ -7,15 +7,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.galery.BR
-import com.example.galery.Event
+import com.example.galery.utilities.Event
 import com.example.galery.R
 import com.example.galery.data.PhotoRepository
-import com.example.galery.data.User
+import com.example.galery.data.model.User
 import com.example.galery.utilities.ObservableViewModel
-import com.example.galery.data.Result
-import com.example.galery.login.LoggedInUserView
-import com.example.galery.login.LoginFormState
-import com.example.galery.login.LoginResult
+import com.example.galery.data.model.Result
+import com.example.galery.data.model.login.LoggedInUserView
+import com.example.galery.data.model.login.LoginFormState
+import com.example.galery.data.model.login.LoginResult
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

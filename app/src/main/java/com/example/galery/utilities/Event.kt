@@ -1,4 +1,4 @@
-package com.example.galery
+package com.example.galery.utilities
 
 import androidx.lifecycle.Observer
 

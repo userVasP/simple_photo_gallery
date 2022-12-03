@@ -1,4 +1,4 @@
-package com.example.galery.data
+package com.example.galery.data.model
 
 /**
  * A generic class that holds a value with its loading status.

@@ -1,7 +1,7 @@
 package com.example.galery.di
 
 import android.content.Context
-import com.example.galery.MainActivity
+import com.example.galery.views.MainActivity
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module

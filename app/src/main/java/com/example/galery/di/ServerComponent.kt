@@ -1,6 +1,6 @@
 package com.example.galery.di
 
-import com.example.galery.ServerFragment
+import com.example.galery.views.ServerFragment
 import dagger.Subcomponent
 
 @Subcomponent(modules = [ServerModule::class])

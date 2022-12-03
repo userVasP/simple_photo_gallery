@@ -1,6 +1,6 @@
 package com.example.galery.api
 
-import com.example.galery.data.User
+import com.example.galery.data.model.User
 import com.example.galery.data.model.PhotoResponse
 import com.example.galery.data.model.LoggedInUser
 import okhttp3.MultipartBody
@@ -31,6 +31,6 @@ interface PhotoServerApi {
     suspend fun logout(@Header("Authorization") token: String, @Body loggedInUser: LoggedInUser)
 
     companion object {
-        public const val BASE_URL = "http://10.0.2.2:5058"
+        const val BASE_URL = "http://10.0.2.2:5058"
     }
 }

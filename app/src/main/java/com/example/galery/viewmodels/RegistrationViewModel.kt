@@ -7,14 +7,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.galery.BR
-import com.example.galery.Event
+import com.example.galery.utilities.Event
 import com.example.galery.R
 import com.example.galery.data.PhotoRepository
-import com.example.galery.data.Result
-import com.example.galery.data.User
+import com.example.galery.data.model.Result
+import com.example.galery.data.model.User
 import com.example.galery.utilities.ObservableViewModel
-import com.example.galery.registration.RegistrationResult
-import com.example.galery.registration.RegistrationFormState
+import com.example.galery.data.model.registration.RegistrationResult
+import com.example.galery.data.model.registration.RegistrationFormState
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

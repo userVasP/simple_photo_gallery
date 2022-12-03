@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.example.galery.utilities.Constants
 import com.example.galery.R
-import com.example.galery.data.Photo
+import com.example.galery.data.model.Photo
 import com.example.galery.databinding.GaleryFragmentItemBinding
 
 

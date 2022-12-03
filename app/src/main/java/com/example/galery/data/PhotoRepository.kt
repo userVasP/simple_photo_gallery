@@ -2,6 +2,9 @@ package com.example.galery.data
 
 import android.net.Uri
 import com.example.galery.data.model.LoggedInUser
+import com.example.galery.data.model.Photo
+import com.example.galery.data.model.Result
+import com.example.galery.data.model.User
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,9 +47,7 @@ class PhotoRepository @Inject constructor(private val photoLocalDataSource: Phot
         return photoRemoteDataSource.registration(user)
     }
 
-    val allFavoritePhoto = photoLocalDataSource.getAllFavoritePhoto()
-
-    suspend fun getFavoritePhoto(): List<PhotoEntity> {
+    fun getFavoritePhoto(): List<PhotoEntity> {
         return  photoLocalDataSource.getAllPhoto()
     }
 

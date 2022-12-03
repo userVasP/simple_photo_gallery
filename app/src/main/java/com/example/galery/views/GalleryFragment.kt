@@ -1,4 +1,4 @@
-package com.example.galery
+package com.example.galery.views
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,8 +9,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.galery.adapters.PictureRecyclerViewAdapter
-import com.example.galery.data.Photo
 import com.example.galery.databinding.FragmentItemListBinding
+import com.example.galery.viewmodels.MainActivityViewModel
 import kotlinx.coroutines.launch
 
 

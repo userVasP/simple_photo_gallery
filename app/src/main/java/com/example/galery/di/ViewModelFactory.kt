@@ -2,7 +2,7 @@ package com.example.galery.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.galery.MainActivityViewModel
+import com.example.galery.viewmodels.MainActivityViewModel
 import dagger.Binds
 import dagger.MapKey
 import dagger.Module

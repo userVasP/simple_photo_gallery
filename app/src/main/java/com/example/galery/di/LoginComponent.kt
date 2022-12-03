@@ -1,6 +1,6 @@
 package com.example.galery.di
 
-import com.example.galery.LoginFragment
+import com.example.galery.views.LoginFragment
 import dagger.Subcomponent
 
 @Subcomponent(modules = [LoginModule::class])

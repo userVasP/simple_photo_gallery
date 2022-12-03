@@ -1,4 +1,4 @@
-package com.example.galery
+package com.example.galery.views
 
 import android.net.Uri
 import android.os.Bundle
@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.galery.databinding.FragmentGaleryDetailBinding
 import com.example.galery.utilities.Constants
+import com.example.galery.viewmodels.MainActivityViewModel
 
 
 abstract class GaleryDetailFragment : Fragment() {

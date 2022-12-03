@@ -1,4 +1,4 @@
-package com.example.galery
+package com.example.galery.views
 
 import android.content.Context
 import android.os.Bundle
@@ -10,6 +10,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.example.galery.utilities.EventObserver
+import com.example.galery.GalleryApplication
+import com.example.galery.R
 import com.example.galery.databinding.FragmentLoginBinding
 import com.example.galery.viewmodels.LoginViewModel
 import com.google.android.material.snackbar.Snackbar
@@ -70,14 +73,16 @@ class LoginFragment : Fragment() {
         viewModel.navigateToRegistrationEvent.observe(
             viewLifecycleOwner,
             EventObserver {
-                findNavController().navigate(R.id.action_loginFragment_to_registrationFragment,
+                findNavController().navigate(
+                    R.id.action_loginFragment_to_registrationFragment,
                     null)
             }
         )
         viewModel.navigateToServerEvent.observe(
             viewLifecycleOwner,
             EventObserver {
-                findNavController().navigate(R.id.action_loginFragment_to_serverFragment,
+                findNavController().navigate(
+                    R.id.action_loginFragment_to_serverFragment,
                     null)
             }
         )

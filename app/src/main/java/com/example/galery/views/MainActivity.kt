@@ -1,7 +1,5 @@
-package com.example.galery
+package com.example.galery.views
 
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
@@ -13,22 +11,26 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.*
+import com.example.galery.GalleryApplication
+import com.example.galery.R
 import com.example.galery.databinding.ActivityMainBinding
 import com.example.galery.di.AppComponent
+import com.example.galery.utilities.Constants
+import com.example.galery.viewmodels.MainActivityViewModel
 import javax.inject.Inject
 
-const val PERMISSION_REQUEST_STORAGE = 0
-private const val DELETE_PERMISSION_REQUEST = 1
+
 class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsResultCallback {
 
-    lateinit var appComponent: AppComponent
+    private lateinit var appComponent: AppComponent
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var activityMainBinding: ActivityMainBinding
 
@@ -40,7 +42,8 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
         super.onCreate(savedInstanceState)
 
         activityMainBinding = DataBindingUtil.setContentView(
-            this, R.layout.activity_main)
+            this, R.layout.activity_main
+        )
         appComponent = (application as GalleryApplication).appComponent
         appComponent.inject(this)
 
@@ -77,7 +80,7 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
             }
         }
 
-        viewModel.permissionNeededForDelete.observe(this, Observer { intentSender ->
+        viewModel.permissionNeededForDelete.observe(this) { intentSender ->
             intentSender?.let {
                 // On Android 10+, if the app doesn't have permission to modify
                 // or delete an item, it returns an `IntentSender` that we can
@@ -85,7 +88,7 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
                 // the image.
                 startIntentSenderForResult(
                     intentSender,
-                    DELETE_PERMISSION_REQUEST,
+                    Constants.DELETE_PERMISSION_REQUEST,
                     null,
                     0,
                     0,
@@ -93,7 +96,7 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
                     null
                 )
             }
-        })
+        }
     }
 
     private fun onPermissionGranted() {
@@ -131,7 +134,7 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == PERMISSION_REQUEST_STORAGE) {
+        if (requestCode == Constants.PERMISSION_REQUEST_STORAGE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 onPermissionGranted()
             }
@@ -158,12 +161,12 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK && requestCode == DELETE_PERMISSION_REQUEST) {
+        if (resultCode == Activity.RESULT_OK && requestCode == Constants.DELETE_PERMISSION_REQUEST) {
             viewModel.deletePendingPhoto()
         }
     }
 
     private fun requestStoragePermission(permissions: Array<String>) {
-        ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_STORAGE)
+        ActivityCompat.requestPermissions(this, permissions, Constants.PERMISSION_REQUEST_STORAGE)
     }
 }

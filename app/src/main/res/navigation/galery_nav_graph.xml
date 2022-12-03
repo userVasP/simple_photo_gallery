@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/galery_nav_graph"
     app:startDestination="@id/galleryFragment">
     <fragment
         android:id="@+id/galleryFragment"
-        android:name="com.example.galery.FullGalleryFragment"
+        android:name="com.example.galery.views.FullGalleryFragment"
         android:label="GalleryFragment" >
         <action
             android:id="@+id/action_pictureFragment_to_galleryDetailFragment"
@@ -15,7 +14,7 @@
 
     <fragment
         android:id="@+id/galleryDetailFragment"
-        android:name="com.example.galery.FullGalleryDetailFragment"
+        android:name="com.example.galery.views.FullGalleryDetailFragment"
         android:label="FullGalleryDetailFragment" >
         <action
             android:id="@+id/action_galleryDetailFragment_to_galleryFragment"
@@ -26,7 +25,7 @@
 
     <fragment
         android:id="@+id/selected_galleryDetailFragment"
-        android:name="com.example.galery.SelectedGalleryDetailFragment"
+        android:name="com.example.galery.views.SelectedGalleryDetailFragment"
         android:label="SelectedGalleryDetailFragment" >
 
         <action
@@ -38,7 +37,7 @@
 
     <fragment
         android:id="@+id/selectedGalleryFragment"
-        android:name="com.example.galery.SelectedGalleryFragment"
+        android:name="com.example.galery.views.SelectedGalleryFragment"
         android:label="SelectedGalleryFragment">
         <action
             android:id="@+id/action_pictureFragment_to_galleryDetailFragment"
@@ -47,7 +46,7 @@
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.galery.LoginFragment"
+        android:name="com.example.galery.views.LoginFragment"
         android:label="LoginFragment" >
         <action
             android:id="@+id/action_loginFragment_to_registrationFragment"
@@ -58,7 +57,7 @@
     </fragment>
     <fragment
         android:id="@+id/registrationFragment"
-        android:name="com.example.galery.RegistrationFragment"
+        android:name="com.example.galery.views.RegistrationFragment"
         android:label="RegistrationFragment" >
         <action
             android:id="@+id/action_registrationFragment_to_loginFragment"
@@ -68,7 +67,7 @@
     </fragment>
     <fragment
         android:id="@+id/serverFragment"
-        android:name="com.example.galery.ServerFragment"
+        android:name="com.example.galery.views.ServerFragment"
         android:label="ServerFragment" >
         <action
             android:id="@+id/action_serverFragment_to_loginFragment"

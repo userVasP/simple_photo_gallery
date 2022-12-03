@@ -1,4 +1,4 @@
-package com.example.galery
+package com.example.galery.viewmodels
 
 import android.app.RecoverableSecurityException
 import android.content.Context
@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Handler
 import androidx.lifecycle.*
 import com.example.galery.data.*
+import com.example.galery.data.model.Photo
 import com.example.galery.utilities.ObservableViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,14 +34,6 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
 
     private var _isCurrentPhotoFavorite = MutableLiveData<Boolean>()
     val isCurrentPhotoFavorite: LiveData<Boolean> = _isCurrentPhotoFavorite
-
-    val allFavoritePhoto: LiveData<List<PhotoEntity>> = photoRepository.allFavoritePhoto.asLiveData()
-
-    /*fun registration() {
-        viewModelScope.launch {
-            this@MainActivityViewModel._userData.value?.let { photoRepository.registration(it) }
-        }
-    }*/
 
     fun addFavoritePhoto(key: String) {
         viewModelScope.launch {

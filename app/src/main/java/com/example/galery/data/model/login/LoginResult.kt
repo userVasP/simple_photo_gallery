@@ -1,4 +1,4 @@
-package com.example.galery.login
+package com.example.galery.data.model.login
 
 /**
  * Authentication result : success (user details) or error message.

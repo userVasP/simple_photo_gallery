@@ -1,4 +1,4 @@
-package com.example.galery
+package com.example.galery.views
 
 import android.content.Context
 import android.os.Bundle
@@ -9,6 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.example.galery.utilities.EventObserver
+import com.example.galery.GalleryApplication
+import com.example.galery.R
 import com.example.galery.databinding.FragmentServerBinding
 import com.example.galery.viewmodels.ServerViewModel
 import javax.inject.Inject
@@ -51,7 +54,8 @@ class ServerFragment : Fragment() {
         viewModel.navigateToLoginEvent.observe(
             viewLifecycleOwner,
             EventObserver {
-                findNavController().navigate(R.id.action_serverFragment_to_loginFragment,
+                findNavController().navigate(
+                    R.id.action_serverFragment_to_loginFragment,
                     null)
             }
         )

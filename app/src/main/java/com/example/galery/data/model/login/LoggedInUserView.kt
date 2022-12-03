@@ -1,4 +1,4 @@
-package com.example.galery.login
+package com.example.galery.data.model.login
 
 
 data class LoggedInUserView(

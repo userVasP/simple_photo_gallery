@@ -1,4 +1,4 @@
-package com.example.galery.login
+package com.example.galery.data.model.login
 
 /**
  * Data validation state of the login form.
