@@ -5,6 +5,7 @@ import android.view.View
 import androidx.databinding.Bindable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.galery.BR
 import com.example.galery.utilities.Event
@@ -12,15 +13,19 @@ import com.example.galery.R
 import com.example.galery.data.PhotoRepository
 import com.example.galery.data.model.Result
 import com.example.galery.data.model.User
+import com.example.galery.data.model.login.LoginResult
 import com.example.galery.utilities.ObservableViewModel
 import com.example.galery.data.model.registration.RegistrationResult
 import com.example.galery.data.model.registration.RegistrationFormState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class RegistrationViewModel @Inject constructor(private val photoRepository: PhotoRepository): ObservableViewModel() {
-    private val _registrationResultEvent = MutableLiveData<Event<RegistrationResult>>()
-    val registrationResultEvent: LiveData<Event<RegistrationResult>> = _registrationResultEvent
+@HiltViewModel
+class RegistrationViewModel @Inject constructor(private val photoRepository: PhotoRepository): ViewModel() {
+    private val _registrationResult = MutableLiveData<RegistrationResult>()
+    val registrationResult: LiveData<RegistrationResult> = _registrationResult
 
     private  val _loadingVisibility = MutableLiveData(View.GONE)
     val loadingVisibility: LiveData<Int> = _loadingVisibility
@@ -28,45 +33,36 @@ class RegistrationViewModel @Inject constructor(private val photoRepository: Pho
     private val _userData = MutableLiveData(User("","","",""))
     val userData: LiveData<User> = _userData
 
-    var userName: String = ""
-        @Bindable get
-        set(value) {
-            if (field != value) {
-                field = value
-                _userData.value = User(value, _userData.value!!.Surname, _userData.value!!.Email, _userData.value!!.Password )
-                notifyPropertyChanged(BR.userName)
-            }
-        }
-    var userSurName: String = ""
-        @Bindable get
-        set(value) {
-            if (field != value) {
-                field = value
-                _userData.value = User(_userData.value!!.Name, value,_userData.value!!.Email, _userData.value!!.Password )
-                notifyPropertyChanged(BR.userSurName)
-            }
-        }
-    var userEmail: String = ""
-        @Bindable get
-        set(value) {
-            if (field != value) {
-                field = value
-                _userData.value = User(_userData.value!!.Name, _userData.value!!.Surname, value, _userData.value!!.Password )
-                notifyPropertyChanged(BR.userEmail)
-            }
-        }
-    var userPassword: String = ""
-        @Bindable get
-        set(value) {
-            if (field != value) {
-                field = value
-                _userData.value = User(_userData.value!!.Name, _userData.value!!.Surname, _userData.value!!.Email, value)
-                notifyPropertyChanged(BR.userPassword)
-            }
-        }
+    private val _userName = MutableLiveData("")
+    val userName = _userName
+    fun setUserName(userName: String) {
+        _userName.value = userName
+        _userData.value = User(userName, _userData.value!!.Surname, _userData.value!!.Email, _userData.value!!.Password )
+        loginDataChanged()
+    }
+    private val _userSurName = MutableLiveData("")
+    val userSurName = _userSurName
+    fun setUserSurName(userSurName: String) {
+        _userSurName.value = userSurName
+        _userData.value = User(_userData.value!!.Name, userSurName, _userData.value!!.Email, _userData.value!!.Password )
+        loginDataChanged()
+    }
 
-    private val _navigateToLoginEvent = MutableLiveData<Event<Unit>>()
-    val navigateToRegistrationEvent: LiveData<Event<Unit>> = _navigateToLoginEvent
+    private val _userEmail = MutableLiveData("")
+    val userEmail = _userEmail
+    fun setUserEmail(userEmail: String) {
+        _userEmail.value = userEmail
+        _userData.value = User(_userData.value!!.Name, _userData.value!!.Surname, userEmail, _userData.value!!.Password )
+        loginDataChanged()
+    }
+
+    private val _userPassword = MutableLiveData("")
+    val userPassword = _userPassword
+    fun setUserPassword(userPassword: String) {
+        _userPassword.value = userPassword
+        _userData.value = User(_userData.value!!.Name, _userData.value!!.Surname, _userData.value!!.Email, userPassword)
+        loginDataChanged()
+    }
 
     private val _registrationForm = MutableLiveData<RegistrationFormState>()
     val registrationForm: LiveData<RegistrationFormState> = _registrationForm
@@ -74,22 +70,23 @@ class RegistrationViewModel @Inject constructor(private val photoRepository: Pho
     fun registration() {
         _loadingVisibility.value = View.VISIBLE
         viewModelScope.launch {
+            delay(5000)
             val result = _userData.value?.let {
-                photoRepository.registration(it)
+                //photoRepository.registration(it)
+                Result.Success("") //TODO
             }
             result.let {
                 if (result is Result.Success) {
-                    //_registrationResultEvent.value = Event(RegistrationResult(success = true))
-                    _navigateToLoginEvent.value = Event(Unit)
+                    _registrationResult.value = RegistrationResult(success = true)
                 } else {
-                    _registrationResultEvent.value = Event(RegistrationResult(error = R.string.registration_failed))
+                    _registrationResult.value = RegistrationResult(error = R.string.registration_failed)
                 }
             }
             _loadingVisibility.value = View.GONE
         }
     }
 
-    fun loginDataChanged() {
+    private fun loginDataChanged() {
         if(!isUserNameValid(_userData.value!!.Name!!)) {
             _registrationForm.value = RegistrationFormState(usernameError = R.string.empty_field)
         } else if (!isUserNameValid(_userData.value!!.Surname!!)) {
@@ -117,7 +114,7 @@ class RegistrationViewModel @Inject constructor(private val photoRepository: Pho
         return password.length > 5
     }
 
-    fun navigateToLogin() {
-        _navigateToLoginEvent.value  = Event(Unit)
+    fun resetRegistrationResult() {
+        _registrationResult.value = RegistrationResult()
     }
 }

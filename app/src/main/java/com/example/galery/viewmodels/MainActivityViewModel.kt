@@ -11,13 +11,16 @@ import androidx.lifecycle.*
 import com.example.galery.data.*
 import com.example.galery.data.model.Photo
 import com.example.galery.utilities.ObservableViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class MainActivityViewModel @Inject constructor(private val photoRepository: PhotoRepository, context: Context) : ObservableViewModel() {
+@HiltViewModel
+class MainActivityViewModel @Inject constructor(private val photoRepository: PhotoRepository, @ApplicationContext context: Context) : ObservableViewModel() {
 
 
     var isPermissionGranted = MutableLiveData(false)
@@ -38,10 +41,10 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
     fun addFavoritePhoto(key: String) {
         viewModelScope.launch {
             photoRepository.insertFavoritePhoto(key)
-            _photos.value?.find { it.getKey() == key }?.
-            let {
-                if(_favoritePhotos.value?.contains(it) == false) {
+            _photos.value?.find { it.getKey() == key }?.let {
+                if (_favoritePhotos.value?.contains(it) == false) {
                     (_favoritePhotos.value as MutableList).add(it)
+                    _isCurrentPhotoFavorite.value = true
                 }
             }
         }
@@ -50,17 +53,24 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
     fun removeFavoritePhoto(key: String) {
         viewModelScope.launch {
             photoRepository.deleteFavoritePhoto(key)
-            _photos.value?.find { it.getKey() == key }?.
-            let { (_favoritePhotos.value as MutableList).remove(it) }
+            _photos.value?.find { it.getKey() == key }
+                ?.let {
+                    (_favoritePhotos.value as MutableList).remove(it)
+                    _isCurrentPhotoFavorite.value = false
+                }
         }
     }
 
-    fun checkPhoto(uri: String) {
-
-         viewModelScope.launch {
-             _isCurrentPhotoFavorite.value = photoRepository.checkPhoto(uri)
-        }
+    fun checkPhoto(key: String) {
+        _isCurrentPhotoFavorite.value = (_favoritePhotos.value?.find { it.getKey() == key }) != null
     }
+
+    /*fun checkPhoto(uri: String) {
+
+        viewModelScope.launch {
+            _isCurrentPhotoFavorite.value = photoRepository.checkPhoto(uri)
+        }
+    }*/
 
     fun getPhoto() {
         viewModelScope.launch {
@@ -83,7 +93,7 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
 
     fun checkSavedPhoto(coroutineScope: CoroutineScope) {
         coroutineScope.launch {
-            val allPhotoDef = async(Dispatchers.IO) {photoRepository.getPhoto()}
+            val allPhotoDef = async(Dispatchers.IO) { photoRepository.getPhoto() }
             val allFavoritePhotoDef = async(Dispatchers.IO) { photoRepository.getFavoritePhoto() }
             val allPhoto = allPhotoDef.await()
             val allFavoritePhoto = allFavoritePhotoDef.await()
@@ -96,7 +106,9 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
             _favoritePhotos.postValue(
                 allPhoto.filter { photo ->
                     allFavoritePhoto.find {
-                        it.key == photo.getKey() } != null }
+                        it.key == photo.getKey()
+                    } != null
+                }
             )
         }
 
@@ -114,8 +126,7 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
         viewModelScope.launch {
             try {
                 photoRepository.deletePhoto(uri)
-            }
-            catch (securityException: SecurityException) {
+            } catch (securityException: SecurityException) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     val recoverableSecurityException =
                         securityException as? RecoverableSecurityException

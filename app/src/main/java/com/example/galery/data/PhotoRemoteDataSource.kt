@@ -8,6 +8,7 @@ import com.example.galery.data.model.LoggedInUser
 import com.example.galery.data.model.Photo
 import com.example.galery.data.model.Result
 import com.example.galery.data.model.User
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -16,7 +17,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.*
 import javax.inject.Inject
 
-class PhotoRemoteDataSource @Inject constructor(private val context: Context, private val photoServerApi: PhotoServerApi) {
+class PhotoRemoteDataSource @Inject constructor(@ApplicationContext private val context: Context, private val photoServerApi: PhotoServerApi) {
 
     suspend fun login(user: User): Result<LoggedInUser> {
         return try {

@@ -12,6 +12,7 @@ import com.example.galery.api.PhotoServerApi
 import com.example.galery.data.CollectionUri.getCollectionUri
 import com.example.galery.data.model.Photo
 import com.example.galery.utilities.Utils
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -21,7 +22,7 @@ import java.io.IOException
 import java.util.*
 import javax.inject.Inject
 
-class PhotoLocalDataSource @Inject constructor(private val context: Context,  private val photoDAO: PhotoDAO) {
+class PhotoLocalDataSource @Inject constructor( @ApplicationContext private val context: Context, private val photoDAO: PhotoDAO) {
     private val contentResolver = context.contentResolver
 
     fun getAllFavoritePhoto(): Flow<List<PhotoEntity>> {

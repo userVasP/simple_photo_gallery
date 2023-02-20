@@ -5,6 +5,8 @@
     <string name="photo">Photo</string>
     <string name="photo_deletion">Photo deletion</string>
     <string name="favorite_photo">Favorite photo</string>
+    <string name="prompt_name">Name</string>
+    <string name="prompt_surname">Surname</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in or register</string>
@@ -21,4 +23,5 @@
     <string name="logout">Logout</string>
     <string name="registration">Registration</string>
     <string name="login">Login</string>
+    <string name="shooting_time">Shooting time</string>
 </resources>
