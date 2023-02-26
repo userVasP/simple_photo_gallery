@@ -20,57 +20,17 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainActivityViewModel @Inject constructor(private val photoRepository: PhotoRepository, @ApplicationContext context: Context) : ObservableViewModel() {
+class MainActivityViewModel @Inject constructor(private val photoRepository: PhotoRepository, @ApplicationContext context: Context) : ViewModel() {
 
-
-    var isPermissionGranted = MutableLiveData(false)
-    var isFirstLoadedPhoto = false
-    private var _photos = MutableLiveData<List<Photo>>()
-    val photos: LiveData<List<Photo>> = _photos
-    private var _favoritePhotos = MutableLiveData<List<Photo>>()
-    val favoritePhotos: LiveData<List<Photo>> = _favoritePhotos
     private val contentResolver = context.contentResolver
     private var contentObserver: ContentObserver? = null
     private var pendingDeleteImageUri: Uri? = null
     private val _permissionNeededForDelete = MutableLiveData<IntentSender?>()
     val permissionNeededForDelete: LiveData<IntentSender?> = _permissionNeededForDelete
 
-    private var _isCurrentPhotoFavorite = MutableLiveData<Boolean>()
-    val isCurrentPhotoFavorite: LiveData<Boolean> = _isCurrentPhotoFavorite
-
-    fun addFavoritePhoto(key: String) {
-        viewModelScope.launch {
-            photoRepository.insertFavoritePhoto(key)
-            _photos.value?.find { it.getKey() == key }?.let {
-                if (_favoritePhotos.value?.contains(it) == false) {
-                    (_favoritePhotos.value as MutableList).add(it)
-                    _isCurrentPhotoFavorite.value = true
-                }
-            }
-        }
+    init {
+        getPhoto()
     }
-
-    fun removeFavoritePhoto(key: String) {
-        viewModelScope.launch {
-            photoRepository.deleteFavoritePhoto(key)
-            _photos.value?.find { it.getKey() == key }
-                ?.let {
-                    (_favoritePhotos.value as MutableList).remove(it)
-                    _isCurrentPhotoFavorite.value = false
-                }
-        }
-    }
-
-    fun checkPhoto(key: String) {
-        _isCurrentPhotoFavorite.value = (_favoritePhotos.value?.find { it.getKey() == key }) != null
-    }
-
-    /*fun checkPhoto(uri: String) {
-
-        viewModelScope.launch {
-            _isCurrentPhotoFavorite.value = photoRepository.checkPhoto(uri)
-        }
-    }*/
 
     fun getPhoto() {
         viewModelScope.launch {
@@ -78,7 +38,7 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
                 contentObserver = object : ContentObserver(Handler()) {
                     override fun onChange(selfChange: Boolean) {
                         viewModelScope.launch {
-                            checkSavedPhoto(this)
+                            checkSavedPhoto(this, true)
                         }
                     }
                 }
@@ -91,9 +51,9 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
         }
     }
 
-    fun checkSavedPhoto(coroutineScope: CoroutineScope) {
+    fun checkSavedPhoto(coroutineScope: CoroutineScope, refresh: Boolean = false) {
         coroutineScope.launch {
-            val allPhotoDef = async(Dispatchers.IO) { photoRepository.getPhoto() }
+            val allPhotoDef = async(Dispatchers.IO) { photoRepository.getPhoto(refresh) }
             val allFavoritePhotoDef = async(Dispatchers.IO) { photoRepository.getFavoritePhoto() }
             val allPhoto = allPhotoDef.await()
             val allFavoritePhoto = allFavoritePhotoDef.await()
@@ -102,14 +62,7 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
                     photoRepository.deleteFavoritePhoto(favoritePhoto.key)
                 }
             }
-            _photos.postValue(photoRepository.getPhoto())
-            _favoritePhotos.postValue(
-                allPhoto.filter { photo ->
-                    allFavoritePhoto.find {
-                        it.key == photo.getKey()
-                    } != null
-                }
-            )
+
         }
 
     }

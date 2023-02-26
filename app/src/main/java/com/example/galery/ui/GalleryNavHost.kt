@@ -8,11 +8,15 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.galery.data.model.Photo
+import com.example.galery.viewmodels.CommonGalleryViewModel
+import com.example.galery.viewmodels.FavoriteGalleryViewModel
 import com.example.galery.viewmodels.MainActivityViewModel
 import java.nio.charset.StandardCharsets
 
@@ -26,14 +30,6 @@ fun GalleryNavHost(
     isLogged: Boolean,
     mainViewModel: MainActivityViewModel = viewModel()
 ) {
-    val photo = mainViewModel.photos.observeAsState()
-    val favoritePhoto = mainViewModel.favoritePhotos.observeAsState()
-    val isCurrentPhotoFavorite = mainViewModel.isCurrentPhotoFavorite.observeAsState()
-
-
-    LaunchedEffect(Unit){
-        mainViewModel.getPhoto()
-    }
 
     NavHost(
         navController = navController,
@@ -43,10 +39,11 @@ fun GalleryNavHost(
 
 
         composable(route = Gallery.route) {
-
+            val model: CommonGalleryViewModel = hiltViewModel()
+            val photos = model.photos.observeAsState()
             GalleryGreed(
                 modifier = Modifier,
-                photos = photo.value ?: listOf(),
+                photos = photos.value?: emptyList(),
                 onPhotoClick = { photo ->
                     val encodedUrl = Uri.encode(photo.uri.toString(), StandardCharsets.UTF_8.toString())
                     navController.navigateToDetail(encodedUrl, photo.getKey())
@@ -54,10 +51,11 @@ fun GalleryNavHost(
             )
         }
         composable(route = Favorite.route) {
-
+            val model: FavoriteGalleryViewModel = hiltViewModel()
+            val photos = model.favoritePhotos.observeAsState()
             GalleryGreed(
                 modifier = Modifier,
-                photos = favoritePhoto.value ?: listOf(),
+                photos = photos.value ?: listOf(),
                 onPhotoClick = { photo ->
                     val encodedUrl = Uri.encode(photo.uri.toString(), StandardCharsets.UTF_8.toString())
                     navController.navigateToDetail(encodedUrl, photo.getKey())
@@ -103,13 +101,10 @@ fun GalleryNavHost(
             val photoKey = navBackStack.arguments?.getString(DetailPhoto.keyPhotoArg) ?: ""
             GalleryDetailScreen(
                 photoUri = photoUri,
-                isCurrentPhotoFavorite = isCurrentPhotoFavorite.value ?: false,
-                addFavoritePhoto = { mainViewModel.addFavoritePhoto(photoKey)},
-                removeFavoritePhoto = { mainViewModel.removeFavoritePhoto(photoKey) },
+                photoKey = photoKey,
                 removePhoto = {
                     mainViewModel.deleteChosenPhoto(Uri.parse(photoUri))
-                    navController.navigateUp()},
-                checkStatePhoto = { mainViewModel.checkPhoto(photoKey) }
+                    navController.navigateUp()}
             )
         }
     }

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -19,23 +20,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.galery.R
 import com.example.galery.data.model.Photo
+import com.example.galery.viewmodels.DetailScreenViewModel
 
 @Composable
 fun GalleryDetailScreen(
     photoUri: String,
+    photoKey: String,
     modifier: Modifier = Modifier,
-    addFavoritePhoto: () -> Unit,
-    removeFavoritePhoto: () -> Unit,
     removePhoto: () -> Unit,
-    checkStatePhoto: () -> Unit,
-    isCurrentPhotoFavorite: Boolean
+    model: DetailScreenViewModel = hiltViewModel()
 ) {
-
-    LaunchedEffect(Unit) {
-        checkStatePhoto()
+    val photos = model.favoritePhotos.observeAsState()
+    val isCurrentPhotoFavorite = model.isCurrentPhotoFavorite.observeAsState()
+    LaunchedEffect(photos.value) {
+        model.checkPhoto(photoKey)
     }
     Column(
         modifier = modifier,
@@ -72,19 +74,19 @@ fun GalleryDetailScreen(
             }
 
             IconToggleButton(
-                checked = isCurrentPhotoFavorite,
+                checked = isCurrentPhotoFavorite.value ?:false,
                 onCheckedChange = {
                     if (it) {
-                        addFavoritePhoto()
+                        model.addFavoritePhoto(photoKey)
                     }
                     else {
-                        removeFavoritePhoto()
+                        model.removeFavoritePhoto(photoKey)
                     }
                 },
 
                 modifier.weight(1F)
             ) {
-                val imageVector = if(isCurrentPhotoFavorite) { Icons.Filled.Favorite} else { Icons.Filled.FavoriteBorder }
+                val imageVector = if(isCurrentPhotoFavorite.value == true) { Icons.Filled.Favorite} else { Icons.Filled.FavoriteBorder }
                 Icon(
                     imageVector = imageVector,
                     contentDescription = stringResource(R.string.favorite_photo),

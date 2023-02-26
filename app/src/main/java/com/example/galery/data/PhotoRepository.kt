@@ -5,6 +5,11 @@ import com.example.galery.data.model.LoggedInUser
 import com.example.galery.data.model.Photo
 import com.example.galery.data.model.Result
 import com.example.galery.data.model.User
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -24,7 +29,8 @@ class PhotoRepository @Inject constructor(private val photoLocalDataSource: Phot
 
     }
 
-    private var cachedPhoto: List<Photo>? = null
+    private val cachedPhotoMutex = Mutex()
+    private var cachedPhoto: List<Photo> = emptyList()
 
 
     suspend fun login(user: User): Result<LoggedInUser> {
@@ -51,21 +57,29 @@ class PhotoRepository @Inject constructor(private val photoLocalDataSource: Phot
         return  photoLocalDataSource.getAllPhoto()
     }
 
-    suspend fun getPhoto(): MutableList<Photo> {
-        val photo = photoLocalDataSource.getPhotoLocal()
-        cachedPhoto = photo
-        return photo
+    fun getFavoritePhotoDataStream(): Flow<List<Photo>> {
+        return photoLocalDataSource.getAllFavoritePhoto().map {
+            getPhoto().filter {
+                photo -> it.find { it.key == photo.getKey() } != null
+            }
+        }
+    }
+
+    suspend fun getPhoto(refresh: Boolean = false): List<Photo> {
+
+        if (refresh || cachedPhoto.isEmpty()) {
+            val photo = photoLocalDataSource.getPhotoLocal()
+
+            cachedPhotoMutex.withLock {
+                cachedPhoto = photo
+            }
+        }
+
+        return cachedPhotoMutex.withLock { cachedPhoto }
     }
 
     suspend fun sendPhotoToServer() {
-        if (cachedPhoto == null) {
-            if (getPhoto().isNotEmpty()) {
-                photoRemoteDataSource.sendPhotoToServer(user!!.accessToken, cachedPhoto!!, user!!)
-            }
-        }
-        else {
-            photoRemoteDataSource.sendPhotoToServer(user!!.accessToken, cachedPhoto!!, user!!)
-        }
+        photoRemoteDataSource.sendPhotoToServer(user!!.accessToken, cachedPhoto, user!!)
     }
     suspend fun loadPhotoFromServer() {
         val namesPhoto = photoRemoteDataSource.fetchPhotoFromServer(user!!.accessToken, user!!)
