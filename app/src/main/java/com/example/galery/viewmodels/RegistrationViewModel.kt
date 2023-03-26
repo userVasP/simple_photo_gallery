@@ -18,12 +18,18 @@ import com.example.galery.utilities.ObservableViewModel
 import com.example.galery.data.model.registration.RegistrationResult
 import com.example.galery.data.model.registration.RegistrationFormState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class RegistrationViewModel @Inject constructor(private val photoRepository: PhotoRepository): ViewModel() {
+
+    private val disposable: CompositeDisposable = CompositeDisposable()
+
     private val _registrationResult = MutableLiveData<RegistrationResult>()
     val registrationResult: LiveData<RegistrationResult> = _registrationResult
 
@@ -69,20 +75,17 @@ class RegistrationViewModel @Inject constructor(private val photoRepository: Pho
 
     fun registration() {
         _loadingVisibility.value = View.VISIBLE
-        viewModelScope.launch {
-            delay(5000)
-            val result = _userData.value?.let {
-                //photoRepository.registration(it)
-                Result.Success("") //TODO
-            }
-            result.let {
-                if (result is Result.Success) {
-                    _registrationResult.value = RegistrationResult(success = true)
-                } else {
-                    _registrationResult.value = RegistrationResult(error = R.string.registration_failed)
+
+        _userData.value?.let {
+            disposable.add(photoRepository.registration(it)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doAfterTerminate {
+                    _loadingVisibility.value = View.GONE
                 }
-            }
-            _loadingVisibility.value = View.GONE
+                .subscribe(
+                    { _registrationResult.value = RegistrationResult(success = true) },
+                    { _registrationResult.value = RegistrationResult(error = R.string.registration_failed) }))
         }
     }
 
@@ -116,5 +119,9 @@ class RegistrationViewModel @Inject constructor(private val photoRepository: Pho
 
     fun resetRegistrationResult() {
         _registrationResult.value = RegistrationResult()
+    }
+
+    override fun onCleared() {
+        disposable.clear()
     }
 }

@@ -12,11 +12,16 @@ import com.example.galery.data.PhotoRepository
 import com.example.galery.data.model.Photo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CommonGalleryViewModel @Inject constructor (private val photoRepository: PhotoRepository, @ApplicationContext context: Context) : ViewModel() {
+
+    private val disposable = CompositeDisposable()
 
     private var _photo = MutableLiveData<List<Photo>>()
     val photos: LiveData<List<Photo>> = _photo
@@ -28,14 +33,17 @@ class CommonGalleryViewModel @Inject constructor (private val photoRepository: P
         getPhoto()
     }
 
+
+
     private fun getPhoto() {
         viewModelScope.launch {
             if (contentObserver == null) {
                 contentObserver = object : ContentObserver(Handler()) {
                     override fun onChange(selfChange: Boolean) {
-                        viewModelScope.launch {
-                            _photo.postValue(photoRepository.getPhoto(true))
-                        }
+                        disposable.add(photoRepository.getPhoto(true)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe({ _photo.postValue(it) }, { }))
                     }
                 }
                 contentResolver.registerContentObserver(
@@ -43,7 +51,10 @@ class CommonGalleryViewModel @Inject constructor (private val photoRepository: P
                     contentObserver as ContentObserver
                 )
             }
-            _photo.postValue(photoRepository.getPhoto())
+            disposable.add(photoRepository.getPhoto(true)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ _photo.postValue(it) }, { }))
         }
     }
 
@@ -51,5 +62,6 @@ class CommonGalleryViewModel @Inject constructor (private val photoRepository: P
         contentObserver?.let {
             contentResolver.unregisterContentObserver(it)
         }
+        disposable.clear()
     }
 }

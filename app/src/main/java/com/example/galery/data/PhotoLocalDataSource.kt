@@ -13,6 +13,9 @@ import com.example.galery.data.CollectionUri.getCollectionUri
 import com.example.galery.data.model.Photo
 import com.example.galery.utilities.Utils
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.reactivex.Completable
+import io.reactivex.Flowable
+import io.reactivex.Single
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -25,62 +28,59 @@ import javax.inject.Inject
 class PhotoLocalDataSource @Inject constructor( @ApplicationContext private val context: Context, private val photoDAO: PhotoDAO) {
     private val contentResolver = context.contentResolver
 
-    fun getAllFavoritePhoto(): Flow<List<PhotoEntity>> {
+    fun getAllFavoritePhoto(): Flowable<List<PhotoEntity>> {
         return photoDAO.getAllFavoritePhotoAsFlow()
     }
 
-    suspend fun insertFavoritePhoto(photoEntity: PhotoEntity) {
-        photoDAO.insert(photoEntity)
+    fun insertFavoritePhoto(photoEntity: PhotoEntity): Completable {
+        return photoDAO.insert(photoEntity)
     }
 
     suspend fun checkPhoto(key: String): Boolean {
         return photoDAO.searchPhoto(key).isNotEmpty()
     }
 
-    suspend fun getPhotoLocal(): MutableList<Photo> {
+
+    fun getPhotoLocal(): Single<MutableList<Photo>> {
         val photoList = mutableListOf<Photo>()
-        withContext(Dispatchers.IO) {
+        val projection = arrayOf(
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.DISPLAY_NAME,
+            MediaStore.Images.Media.DATE_ADDED,
+        )
+
+        val query = contentResolver.query(
+            getCollectionUri(),
+            projection,
+            null,
+            null,
+            null
+        )
+        query?.use { cursor ->
+
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+            val nameColumn =
+                cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+            val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
+
+            while (cursor.moveToNext()) {
+
+                val id = cursor.getLong(idColumn)
+                val name = cursor.getString(nameColumn)
+                val dateValue = cursor.getLong(dateColumn)
 
 
-            val projection = arrayOf(
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.DATE_ADDED,
-            )
+                val date = Date(dateValue * 1000).toString()
 
-            val query = contentResolver.query(
-                getCollectionUri(),
-                projection,
-                null,
-                null,
-                null
-            )
-            query?.use { cursor ->
+                val contentUri: Uri = ContentUris.withAppendedId(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    id
+                )
 
-                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-                val nameColumn =
-                    cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
-                val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
-
-                while (cursor.moveToNext()) {
-
-                    val id = cursor.getLong(idColumn)
-                    val name = cursor.getString(nameColumn)
-                    val dateValue = cursor.getLong(dateColumn)
-
-
-                    val date = Date(dateValue * 1000).toString()
-
-                    val contentUri: Uri = ContentUris.withAppendedId(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        id
-                    )
-
-                    photoList += Photo(id, contentUri, name, date)
-                }
+                photoList += Photo(id, contentUri, name, date)
             }
         }
-        return photoList
+        return Single.just(photoList)
     }
 
     suspend fun deletePhoto(imageUri:Uri) {
@@ -91,15 +91,21 @@ class PhotoLocalDataSource @Inject constructor( @ApplicationContext private val 
 
     }
 
-    suspend fun deleteFavoritePhoto(photoEntity: PhotoEntity) {
-        photoDAO.delete(photoEntity)
+
+
+    fun deleteFavoritePhoto(photoEntity: PhotoEntity): Completable {
+        return photoDAO.delete(photoEntity)
     }
 
-    fun getAllPhoto(): List<PhotoEntity> {
+
+
+    fun getAllPhoto(): Single<List<PhotoEntity>> {
         return photoDAO.getAllFavoritePhoto()
     }
 
-    suspend fun insertPhoto(namesPhoto: List<String>, cachedPhoto: List<Photo>?) {
+
+
+    fun insertPhoto(namesPhoto: List<String>, cachedPhoto: List<Photo>?) {
         val namesFilteredPhoto = namesPhoto.filter f@ {
             for (ph in cachedPhoto!!) {
                 if (ph.name == it) {

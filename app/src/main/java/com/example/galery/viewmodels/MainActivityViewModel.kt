@@ -13,6 +13,9 @@ import com.example.galery.data.model.Photo
 import com.example.galery.utilities.ObservableViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -22,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(private val photoRepository: PhotoRepository, @ApplicationContext context: Context) : ViewModel() {
 
+    private val disposable = CompositeDisposable()
     private val contentResolver = context.contentResolver
     private var contentObserver: ContentObserver? = null
     private var pendingDeleteImageUri: Uri? = null
@@ -32,39 +36,38 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
         getPhoto()
     }
 
-    fun getPhoto() {
-        viewModelScope.launch {
-            if (contentObserver == null) {
-                contentObserver = object : ContentObserver(Handler()) {
-                    override fun onChange(selfChange: Boolean) {
-                        viewModelScope.launch {
-                            checkSavedPhoto(this, true)
-                        }
+
+
+    private fun getPhoto() {
+        if (contentObserver == null) {
+            contentObserver = object : ContentObserver(Handler()) {
+                override fun onChange(selfChange: Boolean) {
+                    viewModelScope.launch {
+                        checkSavedPhoto(true)
                     }
                 }
-                contentResolver.registerContentObserver(
-                    CollectionUri.getCollectionUri(), true,
-                    contentObserver as ContentObserver
-                )
             }
-            checkSavedPhoto(this)
+            contentResolver.registerContentObserver(
+                CollectionUri.getCollectionUri(), true,
+                contentObserver as ContentObserver
+            )
         }
+        checkSavedPhoto()
     }
 
-    fun checkSavedPhoto(coroutineScope: CoroutineScope, refresh: Boolean = false) {
-        coroutineScope.launch {
-            val allPhotoDef = async(Dispatchers.IO) { photoRepository.getPhoto(refresh) }
-            val allFavoritePhotoDef = async(Dispatchers.IO) { photoRepository.getFavoritePhoto() }
-            val allPhoto = allPhotoDef.await()
-            val allFavoritePhoto = allFavoritePhotoDef.await()
-            for (favoritePhoto in allFavoritePhoto) {
-                if (allPhoto.find { it.getKey() == favoritePhoto.key } == null) {
-                    photoRepository.deleteFavoritePhoto(favoritePhoto.key)
-                }
-            }
-
+    fun checkSavedPhoto(refresh: Boolean = false) {
+        disposable.add(photoRepository.getPhoto(refresh).flatMap {
+                allPhoto -> photoRepository.getFavoritePhoto().map {
+                allFavoritePhoto -> allFavoritePhoto.filter {
+                fPhoto -> allPhoto.find { it.getKey() == fPhoto.key } == null
+        }.forEach {
+            photoRepository.deleteFavoritePhoto(it.key)
         }
-
+                }
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe())
     }
 
     fun deletePendingPhoto() {
@@ -100,5 +103,6 @@ class MainActivityViewModel @Inject constructor(private val photoRepository: Pho
         contentObserver?.let {
             contentResolver.unregisterContentObserver(it)
         }
+        disposable.clear()
     }
 }

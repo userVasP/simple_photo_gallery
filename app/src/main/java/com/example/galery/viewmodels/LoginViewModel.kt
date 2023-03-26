@@ -16,12 +16,17 @@ import com.example.galery.data.model.login.LoginFormState
 import com.example.galery.data.model.login.LoginResult
 import com.example.galery.utilities.ObservableViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(private val photoRepository: PhotoRepository): ViewModel() {
+
+    private val disposable: CompositeDisposable = CompositeDisposable()
 
     private val _loginResult = MutableLiveData<LoginResult>()
     val loginResult: LiveData<LoginResult> = _loginResult
@@ -54,23 +59,24 @@ class LoginViewModel @Inject constructor(private val photoRepository: PhotoRepos
         _loginResult.value = LoginResult()
     }
 
+
+
     fun login() {
         _loadingVisibility.value = View.VISIBLE
-        viewModelScope.launch {
-            delay(5000)
-            val result = _userData.value?.let {
-                //photoRepository.login(it) TODO
-                Result.Success(LoggedInUser("1", "111", "333"))
-            }
-            if(result != null) {
-                if (result is Result.Success) {
-                    _loginResult.value = LoginResult(success = LoggedInUserView(displayName = result.data.displayName))
-                } else {
-                    _loginResult.value = LoginResult(error = R.string.login_failed)
+
+        _userData.value?.let { user ->
+            disposable.add(photoRepository.login(user)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .doAfterTerminate {
+                    _loadingVisibility.value = View.GONE
                 }
-            }
-            //_loginResult.value = LoginResult(error = R.string.login_failed)
-            _loadingVisibility.value = View.GONE
+                .subscribe( {
+                    _loginResult.value = LoginResult(success = LoggedInUserView(displayName = it.displayName))
+                },
+                    {
+                        _loginResult.value = LoginResult(error = R.string.login_failed)
+                    }))
         }
     }
 
@@ -90,6 +96,10 @@ class LoginViewModel @Inject constructor(private val photoRepository: PhotoRepos
 
     private fun isPasswordValid(password: String): Boolean {
         return password.isNotBlank()
+    }
+
+    override fun onCleared() {
+        disposable.clear()
     }
 
 }

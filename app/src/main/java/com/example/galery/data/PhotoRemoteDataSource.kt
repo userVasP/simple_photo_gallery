@@ -9,77 +9,61 @@ import com.example.galery.data.model.Photo
 import com.example.galery.data.model.Result
 import com.example.galery.data.model.User
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.reactivex.Completable
+import io.reactivex.Observable
+import io.reactivex.Single
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.Response
 import java.io.*
 import javax.inject.Inject
 
 class PhotoRemoteDataSource @Inject constructor(@ApplicationContext private val context: Context, private val photoServerApi: PhotoServerApi) {
 
-    suspend fun login(user: User): Result<LoggedInUser> {
-        return try {
-            val res = photoServerApi.login(user)
-            if (res.isSuccessful) {
-                val userResult = res.body()
-                Result.Success(userResult!!)
-            } else {
-                Result.Error(IOException(res.message()))
+    fun login(user: User): Single<LoggedInUser> {
+        return photoServerApi.login(user).map { res -> if (res.isSuccessful) {
+                res.body()
             }
-
-        } catch (e: Throwable) {
-            Result.Error(IOException("Error logging in", e))
+            else throw Exception(res.message())
         }
     }
 
-    suspend fun logout(user: LoggedInUser?) {
-        try {
-            photoServerApi.logout("Bearer ${user!!.accessToken}", user )
-        }
-        catch (e: Throwable) {
-            println(e.message)
-        }
-
+    fun logout(user: LoggedInUser?): Completable {
+        return photoServerApi.logout("Bearer ${user!!.accessToken}", user).doOnError { println(it.message) }
     }
 
-    suspend fun registration(user: User): Result<Unit> {
-        return try {
-            val res = photoServerApi.postUser(user)
-            if (res.isSuccessful) {
-                Result.Success(Unit)
-            } else {
-                Result.Error(IOException(res.message()))
+
+    fun registration(user: User): Completable {
+        return photoServerApi.postUser(user)
+    }
+
+
+    fun fetchPhotoFromServer(token: String, user: LoggedInUser): Single<List<String>> {
+        return photoServerApi.fetchPhoto("Bearer $token", user.userId.toInt())
+            .map {
+            if (it.isSuccessful) {
+                it.body()!!.namesImages
             }
-
-        } catch (e: Throwable) {
-            Result.Error(IOException("Error logging in", e))
+            else throw Exception(it.message())
         }
     }
 
+    fun sendPhotoToServer(token: String, photo: List<Photo>, user: LoggedInUser): Completable {
+        val headers = HashMap<String, String>()
+        headers["Authorization"] = "Bearer $token"
 
-    suspend fun fetchPhotoFromServer(token: String, user: LoggedInUser): List<String> {
+        return Observable.create<MultipartBody.Part> {
 
-        try {
-            val resp = photoServerApi.fetchPhoto("Bearer $token", user.userId.toInt())
-            if (resp.isSuccessful) {
-                return resp.body()!!.namesImages
-            }
-        }
-        catch (e: Throwable) {
-            println(e.message)
-            return listOf()
-        }
-        return listOf()
-    }
-
-    suspend fun sendPhotoToServer(token: String, photo: List<Photo>, user: LoggedInUser) {
         for (ph in photo) {
-            val file = File(context.cacheDir, ph.name)
-            withContext(Dispatchers.IO) {
-                file.createNewFile()
+            if(it.isDisposed)
+            {
+                break
             }
+            val file = File(context.cacheDir, ph.name)
+            file.createNewFile()
 
             val bitmap = Utils.getBitmap(context, ph.uri)
             val bos = ByteArrayOutputStream()
@@ -87,19 +71,15 @@ class PhotoRemoteDataSource @Inject constructor(@ApplicationContext private val 
             val bitmapData = bos.toByteArray()
             var fos: FileOutputStream? = null
             try {
-                fos = withContext(Dispatchers.IO) {
-                    FileOutputStream(file)
-                }
+                fos = FileOutputStream(file)
             }
             catch (e: FileNotFoundException) {
                 e.printStackTrace()
             }
             try {
-                withContext(Dispatchers.IO) {
-                    fos!!.write(bitmapData)
-                    fos.flush()
-                    fos.close()
-                }
+                fos!!.write(bitmapData)
+                fos.flush()
+                fos.close()
 
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -107,15 +87,11 @@ class PhotoRemoteDataSource @Inject constructor(@ApplicationContext private val 
 
             val reqFile = file.asRequestBody("image/*".toMediaTypeOrNull())
             val body = MultipartBody.Part.createFormData("upload", file.name, reqFile)
-            val headers = HashMap<String, String>()
-            headers["Authorization"] = "Bearer $token"
-
-            try {
-                photoServerApi.sendPhoto(headers, body, user.userId.toInt())
-            }
-            catch (e: Throwable) {
-                println(e.message)
-            }
+            it.onNext(body)
+        }
+            it.onComplete()
+        }.flatMapCompletable {
+            photoServerApi.sendPhoto(headers, it, user.userId.toInt())
         }
     }
 }

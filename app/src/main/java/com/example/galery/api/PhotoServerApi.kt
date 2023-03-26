@@ -3,6 +3,8 @@ package com.example.galery.api
 import com.example.galery.data.model.User
 import com.example.galery.data.model.PhotoResponse
 import com.example.galery.data.model.LoggedInUser
+import io.reactivex.Completable
+import io.reactivex.Single
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -11,24 +13,24 @@ interface PhotoServerApi {
 
 
     @GET("GetPhoto/{userId}")
-    suspend fun fetchPhoto (@Header("Authorization") token: String, @Path ("userId") userId: Int): Response<PhotoResponse>
+    fun fetchPhoto (@Header("Authorization") token: String, @Path ("userId") userId: Int): Single<Response<PhotoResponse>>
 
     @Multipart
     @POST("Photo")
-    suspend fun sendPhoto (
+    fun sendPhoto (
         @HeaderMap token: Map<String, String>,
         @Part image: MultipartBody.Part,
         @Part("userId") user: Int
-    ): Response<Unit>
+    ): Completable
 
     @POST("Login")
-    suspend fun login(@Body user: User): Response<LoggedInUser>
+    fun login(@Body user: User): Single<Response<LoggedInUser>>
 
     @POST("Registration")
-     suspend fun postUser(@Body user: User): Response<Unit>
+    fun postUser(@Body user: User): Completable
 
     @POST("Logout")
-    suspend fun logout(@Header("Authorization") token: String, @Body loggedInUser: LoggedInUser)
+    fun logout(@Header("Authorization") token: String, @Body loggedInUser: LoggedInUser): Completable
 
     companion object {
         const val BASE_URL = "http://10.0.2.2:5058"
