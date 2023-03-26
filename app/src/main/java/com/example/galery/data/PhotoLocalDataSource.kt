@@ -95,7 +95,7 @@ class PhotoLocalDataSource @Inject constructor( @ApplicationContext private val 
         photoDAO.delete(photoEntity)
     }
 
-    fun getAllPhoto(): List<PhotoEntity> {
+    suspend fun getAllPhoto(): List<PhotoEntity> {
         return photoDAO.getAllFavoritePhoto()
     }
 

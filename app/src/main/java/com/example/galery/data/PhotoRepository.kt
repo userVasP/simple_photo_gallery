@@ -53,7 +53,7 @@ class PhotoRepository @Inject constructor(private val photoLocalDataSource: Phot
         return photoRemoteDataSource.registration(user)
     }
 
-    fun getFavoritePhoto(): List<PhotoEntity> {
+    suspend fun getFavoritePhoto(): List<PhotoEntity> {
         return  photoLocalDataSource.getAllPhoto()
     }
 

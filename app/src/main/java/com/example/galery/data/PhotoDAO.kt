@@ -16,7 +16,7 @@ interface PhotoDAO {
     @Query("SELECT * FROM favorite_photo_table")
     fun getAllFavoritePhotoAsFlow(): Flow<List<PhotoEntity>>
     @Query("SELECT * FROM favorite_photo_table")
-    fun getAllFavoritePhoto(): List<PhotoEntity>
+    suspend fun getAllFavoritePhoto(): List<PhotoEntity>
     @Delete
     suspend fun delete(photoEntity: PhotoEntity)
 }
